@@ -2,7 +2,7 @@ version: '3.4'
 services:
   scheduler:
     build: .
-    image: &img scheduler
+    image: &img bc
     command: [celery, beat, --app=beat.app ]
     environment: &env
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672
