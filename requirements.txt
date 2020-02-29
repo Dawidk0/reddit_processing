@@ -1,0 +1,9 @@
+numpy
+kombu==4.6.7
+pymagnitude
+celery==4.3.0
+praw==6.5.1
+influxdb
+pymongo==3.10.1
+dataclasses==0.6
+dataclasses-json==0.3

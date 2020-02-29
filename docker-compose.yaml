@@ -1,0 +1,63 @@
+version: '3.4'
+services:
+  scheduler:
+    build: .
+    image: &img scheduler
+    command: [celery, beat, --app=beat.app ]
+    environment: &env
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672
+      - CELERY_RESULT_BACKEND=rpc
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./scheduler:/app
+      - ./shared:/app/shared
+
+  scrapper_worker:
+    image: *img
+    command: ["./shared/wait-for-it.sh", "localhost:15672", "--" ,celery, worker, --app=worker.app]
+    environment: *env
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./scrapper_worker:/app
+      - ./shared:/app/shared
+
+  embedding_worker:
+    image: *img
+    command: ["./shared/wait-for-it.sh", "localhost:15672", "--" ,celery, worker, --app=worker.app]
+    environment: *env
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./embedding_worker:/app
+      - ./shared:/app/shared
+
+  database_worker:
+    image: *img
+    command: ["./shared/wait-for-it.sh", "localhost:15672", "--" ,celery, worker, --app=worker.app]
+    environment: *env
+    depends_on:
+      - rabbitmq
+      - mongodb
+    volumes:
+      - ./database_worker:/app
+      - ./shared:/app/shared
+
+  mongodb:
+    image: mongo
+    environment:
+      - MONGO_INITDB_DATABSE=lsdp
+    volumes:
+      - ./data/mongoDB:/data
+    ports:
+      - 27017:27017
+
+  rabbitmq:
+    image: rabbitmq:3.8
+    environment:
+      - RABBITMQ_LOGS=[{warning}]
+    ports:
+     - 15672:15672
+
+
